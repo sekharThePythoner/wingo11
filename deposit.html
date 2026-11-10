@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Deposit Funds | Wingo 11</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💳</text></svg>">
+  <style>
+    .deposit-container {
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .qr-card {
+      background: #090e18;
+      border: 2px dashed rgba(16, 185, 129, 0.4);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1rem;
+      text-align: center;
+      margin: 1.5rem 0;
+      display: none;
+    }
+
+    .qr-image {
+      width: 220px;
+      height: 220px;
+      background: white;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      margin: 0 auto 1rem auto;
+      display: block;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .upi-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .step-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.8rem;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="container">
+    <div class="deposit-container">
+      <div class="page-header" style="text-align: left;">
+        <h1 class="page-title">💳 Deposit Funds</h1>
+        <p class="page-subtitle">Instant UPI auto-credit. Type any custom amount (Min ₹50).</p>
+      </div>
+
+      <div class="glass-card" style="margin-bottom: 1.8rem;">
+        <!-- STEP 1: Enter Custom Amount -->
+        <div style="margin-bottom: 1.5rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.8rem; display: flex; align-items: center;">
+            <span class="step-badge">1</span> Enter Your Deposit Amount
+          </h3>
+
+          <div class="form-group">
+            <label class="form-label">Custom Deposit Amount (₹) - Min ₹50:</label>
+            <div class="input-prefix-box">
+              <span class="input-prefix">₹</span>
+              <input type="number" id="deposit-amount-input" class="form-input" value="100" min="50" step="1" placeholder="Enter custom amount (e.g. 75, 150, 500)">
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 4px;">
+              You can type any custom amount above ₹50 or pick a quick preset below:
+            </div>
+          </div>
+
+          <!-- Quick Presets -->
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem;">
+            <button class="chip-btn" data-preset="50">₹50</button>
+            <button class="chip-btn active" data-preset="100">₹100</button>
+            <button class="chip-btn" data-preset="200">₹200</button>
+            <button class="chip-btn" data-preset="500">₹500</button>
+            <button class="chip-btn" data-preset="1000">₹1,000</button>
+            <button class="chip-btn" data-preset="2500">₹2,500</button>
+            <button class="chip-btn" data-preset="5000">₹5,000</button>
+          </div>
+
+          <button id="generate-qr-btn" class="btn btn-emerald" style="width: 100%; padding: 0.85rem; font-size: 1rem;">
+            ⚡ Generate QR Code for ₹<span id="btn-amount-preview">100</span>
+          </button>
+        </div>
+
+        <!-- STEP 2: QR Code & UPI Payment Details -->
+        <div class="qr-card" id="qr-section">
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center; justify-content: center;">
+            <span class="step-badge">2</span> Scan & Pay Exact Amount
+          </h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.2rem;">
+            Scan with Google Pay, PhonePe, Paytm, or BHIM to pay <strong id="qr-amount-text" style="color: #34d399; font-size: 1.15rem; font-family: var(--font-mono);">₹100</strong>
+          </p>
+
+          <img src="" alt="UPI QR Code" id="upi-qr-image" class="qr-image">
+
+          <div class="upi-pill">
+            <div style="text-align: left;">
+              <div style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase;">UPI ID:</div>
+              <div id="upi-id-text" style="color: white; font-size: 0.95rem;">brosekhar12@okhdfcbank</div>
+            </div>
+            <button id="copy-upi-btn" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.78rem;">
+              📋 Copy
+            </button>
+          </div>
+
+          <!-- Direct Payment deep link for mobile users -->
+          <a id="mobile-upi-link" href="#" class="btn btn-primary" style="width: 100%; margin-bottom: 1.5rem; text-decoration: none;">
+            📱 Pay Directly in UPI App
+          </a>
+
+          <!-- STEP 3: Enter UTR / Transaction Code -->
+          <div style="border-top: 1px solid var(--border-subtle); padding-top: 1.5rem; text-align: left;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center;">
+              <span class="step-badge">3</span> Verify Transaction
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Paste the 12-digit UTR / Bank Reference number from your payment confirmation:
+            </p>
+
+            <div class="form-group">
+              <label class="form-label">12-Digit Transaction / UTR Code:</label>
+              <input type="text" id="utr-code-input" class="form-input" placeholder="e.g. 431982736412" maxlength="24">
+            </div>
+
+            <button id="verify-payment-btn" class="btn btn-gold" style="width: 100%; padding: 0.9rem; font-size: 1.05rem;">
+              ✅ Verify Payment & Add ₹<span id="verify-amount-preview">100</span> to Balance
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guidelines -->
+      <div class="glass-card">
+        <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.6rem;">💡 Deposit Guidelines</h4>
+        <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.2rem;">
+          <li>Minimum deposit is strictly <strong>₹50</strong>. You can enter any custom amount (e.g. ₹75, ₹150, ₹500, ₹10,000).</li>
+          <li>Ensure you copy the <strong>UTR / Bank Reference number</strong> from your UPI app receipt accurately.</li>
+          <li>For immediate queries, support is available 24/7 on Telegram at <strong>t.me/@the_phantom_x</strong> or <strong>brosekhar12@gmail.com</strong>.</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { setupNavbar, startAuthWatcher, showToast, currentUser } from "./shared.js";
+    import { createDeposit } from "./firebase-config.js";
+    import { sound } from "./audio.js";
+
+    setupNavbar("deposit");
+    startAuthWatcher();
+
+    const UPI_ID = "brosekhar12@okhdfcbank";
+    let depositAmt = 100;
+
+    const amountInput = document.getElementById("deposit-amount-input");
+    const generateBtn = document.getElementById("generate-qr-btn");
+    const qrSection = document.getElementById("qr-section");
+    const qrImage = document.getElementById("upi-qr-image");
+    const qrAmountText = document.getElementById("qr-amount-text");
+    const btnAmountPreview = document.getElementById("btn-amount-preview");
+    const verifyAmountPreview = document.getElementById("verify-amount-preview");
+    const mobileUpiLink = document.getElementById("mobile-upi-link");
+    const copyUpiBtn = document.getElementById("copy-upi-btn");
+    const utrInput = document.getElementById("utr-code-input");
+    const verifyBtn = document.getElementById("verify-payment-btn");
+
+    function updateAmountPreviews(val) {
+      const displayVal = isNaN(val) || val <= 0 ? "--" : val;
+      btnAmountPreview.textContent = displayVal;
+      verifyAmountPreview.textContent = displayVal;
+      qrAmountText.textContent = `₹${displayVal}`;
+    }
+
+    // Dynamic custom input listener
+    amountInput.oninput = () => {
+      const val = parseFloat(amountInput.value);
+      depositAmt = isNaN(val) ? 0 : val;
+      updateAmountPreviews(depositAmt);
+
+      // Deselect preset buttons if custom value typed
+      document.querySelectorAll(".chip-btn").forEach(b => {
+        if (parseFloat(b.dataset.preset) === depositAmt) {
+          b.classList.add("active");
+        } else {
+          b.classList.remove("active");
+        }
+      });
+    };
+
+    // Quick presets
+    document.querySelectorAll(".chip-btn").forEach(btn => {
+      btn.onclick = () => {
+        sound.playClick();
+        document.querySelectorAll(".chip-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        depositAmt = parseFloat(btn.dataset.preset);
+        amountInput.value = depositAmt;
+        updateAmountPreviews(depositAmt);
+      };
+    });
+
+    // Generate Dynamic QR Code for Custom Amount
+    generateBtn.onclick = () => {
+      sound.playClick();
+      if (!currentUser) {
+        showToast("Please sign in to deposit funds!", "info");
+        return;
+      }
+
+      depositAmt = parseFloat(amountInput.value);
+      if (isNaN(depositAmt) || depositAmt < 50) {
+        showToast("Minimum deposit amount is ₹50! Enter ₹50 or more.", "error");
+        return;
+      }
+
+      const upiUrl = `upi://pay?pa=${UPI_ID}&pn=Wingo11&am=${depositAmt.toFixed(2)}&cu=INR&tn=Wingo11_${currentUser.gameUid || 'Deposit'}`;
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}`;
+
+      qrImage.src = qrCodeUrl;
+      updateAmountPreviews(depositAmt.toFixed(2));
+      mobileUpiLink.href = upiUrl;
+
+      qrSection.style.display = "block";
+      qrSection.scrollIntoView({ behavior: "smooth" });
+      showToast(`QR Code generated for ₹${depositAmt}! Scan to pay.`, "info");
+    };
+
+    // Copy UPI ID
+    copyUpiBtn.onclick = () => {
+      sound.playClick();
+      navigator.clipboard.writeText(UPI_ID).then(() => {
+        showToast("UPI ID copied: " + UPI_ID, "success");
+      });
+    };
+
+    // Verify Payment
+    verifyBtn.onclick = async () => {
+      if (!currentUser) {
+        showToast("Please sign in to continue!", "info");
+        return;
+      }
+
+      const utr = utrInput.value.trim();
+      if (!utr || utr.length < 6) {
+        showToast("Please enter a valid 12-digit UTR / Reference code!", "error");
+        return;
+      }
+
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = "⏳ Verifying Payment...";
+
+      try {
+        await createDeposit(currentUser.uid, currentUser.gameUid, depositAmt, utr);
+        sound.playWin();
+        showToast(`🎉 Success! ₹${depositAmt} added to your balance!`, "success");
+
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 1500);
+      } catch (err) {
+        showToast(err.message, "error");
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = `✅ Verify Payment & Add ₹${depositAmt} to Balance`;
+      }
+    };
+  </script>
+</body>
+</html>

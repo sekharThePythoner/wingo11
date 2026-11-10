@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wingo 11 : A prediction game | Official Arena</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
+</head>
+<body>
+
+  <!-- Shared Header Nav -->
+  <header id="app-header"></header>
+
+  <!-- Live Winners Marquee Ticker -->
+  <div class="container" style="padding-top: 0.75rem; padding-bottom: 0;">
+    <div class="ticker-wrap">
+      <div class="ticker-label">
+        <span>⚡ LIVE WINS:</span>
+      </div>
+      <div class="ticker-content" id="ticker-feed">
+        <span class="ticker-item">User <strong>W11-849201</strong> won <span class="win-amt">₹1,800.00</span> in Colour Prediction (Green 🟢)</span>
+        <span class="ticker-item">User <strong>W11-394022</strong> won <span class="win-amt">₹3,450.00</span> in 6x6 Mine Bomb (14 Gems 💎)</span>
+        <span class="ticker-item">User <strong>W11-502847</strong> won <span class="win-amt">₹7,200.00</span> in Roulette (Single 17 🎯)</span>
+        <span class="ticker-item">User <strong>W11-918234</strong> won <span class="win-amt">₹900.00</span> in Colour Prediction (Violet 🟣)</span>
+        <span class="ticker-item">User <strong>W11-667120</strong> won <span class="win-amt">₹2,100.00</span> in 6x6 Mine Bomb 💎</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    <!-- Hero Banner -->
+    <div class="glass-card" style="margin-bottom: 1.5rem; background: radial-gradient(circle at 85% 15%, rgba(99, 102, 241, 0.22) 0%, rgba(13, 19, 33, 0.95) 75%); border: 1px solid rgba(99, 102, 241, 0.25);">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.25rem;">
+        <div>
+          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 99px; margin-bottom: 0.6rem;">
+            <span style="color: var(--accent-gold); font-size: 0.78rem; font-weight: 700;">★ OFFICIAL PREDICTION ARENA</span>
+          </div>
+          <h1 style="font-size: 2.1rem; font-weight: 900; line-height: 1.15; margin-bottom: 0.4rem; color: #fff;">
+            Wingo 11 : A prediction game
+          </h1>
+          <p style="color: var(--text-muted); max-width: 540px; font-size: 0.92rem; line-height: 1.55;">
+            Play 60-second Colour Prediction, uncover safe gems in 6×6 Mine Bomb, or place your bets on European Roulette. Instant UPI deposits and guaranteed 24hr withdrawals!
+          </p>
+          <div style="display: flex; gap: 0.75rem; margin-top: 1.2rem; flex-wrap: wrap;">
+            <a href="deposit.html" class="btn btn-emerald" style="padding: 0.6rem 1.2rem;">
+              <span>💳 Add Cash (Min ₹50)</span>
+            </a>
+            <a href="gift.html" class="btn btn-outline" style="padding: 0.6rem 1.2rem;">
+              <span>🎁 Gift Box</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Stats Card -->
+        <div style="background: rgba(8, 12, 20, 0.75); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.1rem 1.4rem; min-width: 240px;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.6rem;">Live Statistics</div>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: var(--text-muted); font-size: 0.85rem;">Active Players:</span>
+              <span style="font-weight: 800; color: #34d399; font-family: var(--font-mono); font-size: 0.92rem;">14,892 Online</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: var(--text-muted); font-size: 0.85rem;">24h Payouts:</span>
+              <span style="font-weight: 800; color: var(--accent-gold); font-family: var(--font-mono); font-size: 0.92rem;">₹8,45,210</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: var(--text-muted); font-size: 0.85rem;">Min Deposit:</span>
+              <span style="font-weight: 800; color: white; font-family: var(--font-mono); font-size: 0.92rem;">₹50.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 Large Game Boxes Section -->
+    <div class="page-header" style="text-align: left; margin-bottom: 1rem;">
+      <h2 style="font-size: 1.5rem; font-weight: 800; color: #fff;">
+        🎯 Select Your Game
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.88rem;">Choose any of the 3 featured games:</p>
+    </div>
+
+    <div class="game-grid">
+      <!-- GAME 1: Colour Prediction -->
+      <a href="colour.html" class="game-card">
+        <div class="game-card-media colour-bg">
+          <div class="game-badge">
+            <span class="dot"></span>
+            <span>60s FAST ROUND</span>
+          </div>
+          <span class="game-multiplier-tag">2x - 9x</span>
+          <div style="text-align: center;">
+            <div style="font-size: 3.5rem; filter: drop-shadow(0 0 16px rgba(139, 92, 246, 0.7));">🎨</div>
+            <div style="display: flex; gap: 8px; justify-content: center; margin-top: 4px;">
+              <span style="width: 12px; height: 12px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
+              <span style="width: 12px; height: 12px; border-radius: 50%; background: #8b5cf6; box-shadow: 0 0 8px #8b5cf6;"></span>
+              <span style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444;"></span>
+            </div>
+          </div>
+        </div>
+        <div class="game-card-body">
+          <div class="game-card-title">
+            <span>Colour Prediction</span>
+            <span style="color: var(--accent-gold); font-size: 1rem;">⏱️ 60s</span>
+          </div>
+          <p class="game-card-desc">
+            Predict Green, Red, Violet, or pick lucky numbers 0–9 for up to 9X returns every 60 seconds!
+          </p>
+          <div class="game-card-footer">
+            <span style="font-size: 0.82rem; color: var(--text-muted);">Min Bet: ₹10</span>
+            <span class="btn btn-primary" style="padding: 0.4rem 0.95rem; font-size: 0.85rem;">Play Now →</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- GAME 2: 6*6 Mine Bomb -->
+      <a href="bomb.html" class="game-card">
+        <div class="game-card-media bomb-bg">
+          <div class="game-badge">
+            <span class="dot"></span>
+            <span>STRATEGY & RISK</span>
+          </div>
+          <span class="game-multiplier-tag">UP TO 50x</span>
+          <div style="text-align: center;">
+            <div style="font-size: 3.5rem; filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.7));">💣</div>
+            <div style="font-size: 0.8rem; color: #fca5a5; font-weight: 700; margin-top: 2px;">36 TILES</div>
+          </div>
+        </div>
+        <div class="game-card-body">
+          <div class="game-card-title">
+            <span>6×6 Mine Bomb</span>
+            <span style="color: #ef4444; font-size: 1rem;">💎 / 💣</span>
+          </div>
+          <p class="game-card-desc">
+            Uncover safe diamonds across the 36-tile grid and cash out your winnings before triggering a hidden bomb.
+          </p>
+          <div class="game-card-footer">
+            <span style="font-size: 0.82rem; color: var(--text-muted);">Mines: 1–24</span>
+            <span class="btn btn-danger" style="padding: 0.4rem 0.95rem; font-size: 0.85rem;">Play Now →</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- GAME 3: Roulette -->
+      <a href="roulette.html" class="game-card">
+        <div class="game-card-media roulette-bg">
+          <div class="game-badge">
+            <span class="dot"></span>
+            <span>CLASSIC CASINO</span>
+          </div>
+          <span class="game-multiplier-tag">36x SINGLE</span>
+          <div style="text-align: center;">
+            <div style="font-size: 3.5rem; filter: drop-shadow(0 0 16px rgba(16, 185, 129, 0.7));">🎡</div>
+            <div style="font-size: 0.8rem; color: #6ee7b7; font-weight: 700; margin-top: 2px;">EUROPEAN WHEEL</div>
+          </div>
+        </div>
+        <div class="game-card-body">
+          <div class="game-card-title">
+            <span>Roulette Wheel</span>
+            <span style="color: #34d399; font-size: 1rem;">🔴 / ⚫</span>
+          </div>
+          <p class="game-card-desc">
+            Place bets on Red/Black, Even/Odd, Dozens, or single numbers 0–36 on an authentic rotating wheel.
+          </p>
+          <div class="game-card-footer">
+            <span style="font-size: 0.82rem; color: var(--text-muted);">Table Layout</span>
+            <span class="btn btn-emerald" style="padding: 0.4rem 0.95rem; font-size: 0.85rem;">Play Now →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Quick Services Grid -->
+    <div style="margin-top: 2.2rem;">
+      <div class="page-header" style="text-align: left; margin-bottom: 0.9rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff;">⚡ Account & Quick Services</h3>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.85rem;">
+        <a href="deposit.html" class="glass-card" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.85rem;">
+          <div style="font-size: 1.8rem; background: rgba(16, 185, 129, 0.15); width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">💳</div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem;">Deposit Funds</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Custom Amount (Min ₹50)</div>
+          </div>
+        </a>
+
+        <a href="withdraw.html" class="glass-card" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.85rem;">
+          <div style="font-size: 1.8rem; background: rgba(245, 158, 11, 0.15); width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">💸</div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem;">Withdrawal</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Min ₹50 within 24hrs</div>
+          </div>
+        </a>
+
+        <a href="gift.html" class="glass-card" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.85rem;">
+          <div style="font-size: 1.8rem; background: rgba(139, 92, 246, 0.15); width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">🎁</div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem;">Send / Claim Gifts</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Transfer Balance by UID</div>
+          </div>
+        </a>
+
+        <a href="Account.html" class="glass-card" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.85rem;">
+          <div style="font-size: 1.8rem; background: rgba(99, 102, 241, 0.15); width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">👤</div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem;">My Account</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Change DP & Profile</div>
+          </div>
+        </a>
+
+        <a href="help.html" class="glass-card" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.85rem;">
+          <div style="font-size: 1.8rem; background: rgba(6, 182, 212, 0.15); width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">💬</div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem;">Help & Support</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Telegram & Email</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid var(--border-subtle); padding: 1.5rem 1rem; text-align: center; color: var(--text-dim); font-size: 0.82rem; background: rgba(8, 12, 20, 0.95);">
+    <div class="container" style="padding-bottom: 0;">
+      <div style="margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: center; gap: 1.25rem; flex-wrap: wrap;">
+        <a href="help.html" style="color: var(--text-muted); text-decoration: none;">Help Desk</a>
+        <a href="https://t.me/the_phantom_x" target="_blank" style="color: var(--text-muted); text-decoration: none;">Telegram: @the_phantom_x</a>
+        <a href="mailto:brosekhar12@gmail.com" style="color: var(--text-muted); text-decoration: none;">brosekhar12@gmail.com</a>
+      </div>
+      <p>© 2026 Wingo 11 : A prediction game. 18+ Only. Play responsibly.</p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { setupNavbar, startAuthWatcher } from "./shared.js";
+
+    setupNavbar("home");
+    // If not signed in, startAuthWatcher immediately redirects visitor to auth.html
+    startAuthWatcher();
+  </script>
+</body>
+</html>

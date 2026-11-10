@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Help & Support | Wingo 11</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+  <style>
+    .help-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 860px) {
+      .help-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .contact-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 1rem 0;
+    }
+
+    .faq-question {
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.95rem;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .faq-answer {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="container">
+    <div class="page-header" style="text-align: left; margin-bottom: 1.5rem;">
+      <h1 class="page-title">💬 Help & 24/7 Support</h1>
+      <p class="page-subtitle">Raise a support query, contact our team via Telegram, or get answers to common questions.</p>
+    </div>
+
+    <div class="help-layout">
+      <!-- Query Form -->
+      <div class="glass-card">
+        <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem;">📝 Submit a Ticket / Query</h2>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.2rem;">
+          Write your request or issue below. It will open and dispatch directly to <strong>brosekhar12@gmail.com</strong>.
+        </p>
+
+        <form id="support-query-form">
+          <div class="form-group">
+            <label class="form-label">Your Name / Game UID:</label>
+            <input type="text" id="query-name" class="form-input" placeholder="e.g. Rahul (W11-482910)" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Your Email Address:</label>
+            <input type="email" id="query-email" class="form-input" placeholder="e.g. rahul@gmail.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Category / Topic:</label>
+            <select id="query-category" class="form-input" style="background: var(--bg-input);">
+              <option value="Deposit Verification">Deposit Verification (₹50+)</option>
+              <option value="Withdrawal Status">Withdrawal Status (24hr Payout)</option>
+              <option value="Gameplay Inquiry">Gameplay / Prediction Question</option>
+              <option value="Gift Issue">Gift Transfer Inquiry</option>
+              <option value="Account / Other">Account / Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">UTR / Reference Number (If applicable):</label>
+            <input type="text" id="query-utr" class="form-input" placeholder="Optional 12-digit UTR">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Detailed Message:</label>
+            <textarea id="query-message" class="form-input" rows="4" placeholder="Describe your issue or question in detail..." required style="resize: vertical;"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-emerald" style="width: 100%; padding: 0.9rem; font-size: 1.05rem;">
+            ✉️ Send Query to brosekhar12@gmail.com
+          </button>
+        </form>
+      </div>
+
+      <!-- Direct Contact Channels & FAQ -->
+      <div>
+        <!-- Telegram Contact Card -->
+        <div class="contact-card">
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">
+              ✈️
+            </div>
+            <div>
+              <div style="font-size: 0.8rem; color: #7dd3fc; text-transform: uppercase; font-weight: 700;">Direct Live Chat</div>
+              <div style="font-size: 1.2rem; font-weight: 800; color: #fff;">Telegram Support</div>
+            </div>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5;">
+            Need instant live assistance? Reach out directly to our official support handle on Telegram:
+          </p>
+          <a href="https://t.me/the_phantom_x" target="_blank" class="btn btn-primary" style="width: 100%; text-decoration: none; justify-content: center;">
+            💬 Open Telegram: @the_phantom_x
+          </a>
+        </div>
+
+        <!-- Email Contact Card -->
+        <div class="glass-card" style="margin-bottom: 1.5rem;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="font-size: 2rem;">📧</div>
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Official Support Email</div>
+              <a href="mailto:brosekhar12@gmail.com" style="color: var(--accent-gold); font-size: 1.05rem; font-weight: 700; text-decoration: none;">
+                brosekhar12@gmail.com
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ Accordion -->
+        <div class="glass-card">
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.8rem;">❓ Frequently Asked Questions</h3>
+          
+          <div class="faq-item">
+            <div class="faq-question"><span>💳</span> What is the minimum deposit?</div>
+            <div class="faq-answer">The minimum deposit is ₹50. After scanning the dynamic UPI QR code, simply paste your 12-digit transaction UTR code to instantly add ₹50+ to your balance.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question"><span>💸</span> How long do withdrawals take?</div>
+            <div class="faq-answer">Withdrawals start at ₹50. After entering your UPI ID and submitting, our payments desk verifies and completes the bank transfer to your UPI within 24 hours.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question"><span>🎁</span> How do Game Gifts work?</div>
+            <div class="faq-answer">Every user gets a Game UID (e.g. W11-482910). You can send money to any user with their UID. The recipient opens the Gift section and reveals their mystery box to credit their balance!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { setupNavbar, startAuthWatcher, showToast, currentUser } from "./shared.js";
+    import { db } from "./firebase-config.js";
+    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { sound } from "./audio.js";
+
+    setupNavbar("help");
+
+    const form = document.getElementById("support-query-form");
+    const nameInput = document.getElementById("query-name");
+    const emailInput = document.getElementById("query-email");
+
+    startAuthWatcher((userProfile) => {
+      if (userProfile) {
+        nameInput.value = `${userProfile.displayName || 'Player'} (${userProfile.gameUid || 'W11-USER'})`;
+        emailInput.value = userProfile.email || "";
+      }
+    });
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      sound.playClick();
+
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const category = document.getElementById("query-category").value;
+      const utr = document.getElementById("query-utr").value.trim();
+      const message = document.getElementById("query-message").value.trim();
+
+      // Save ticket in Firestore
+      try {
+        await addDoc(collection(db, "support_queries"), {
+          userId: currentUser?.uid || "guest",
+          gameUid: currentUser?.gameUid || "guest",
+          name,
+          email,
+          category,
+          utr,
+          message,
+          createdAt: serverTimestamp()
+        });
+      } catch (err) {
+        console.warn("Ticket firestore log notice:", err);
+      }
+
+      // Pre-fill and redirect to email client (brosekhar12@gmail.com)
+      const subject = encodeURIComponent(`[Wingo 11 Support] ${category} - ${name}`);
+      const body = encodeURIComponent(
+        `Hello Wingo 11 Support Team,\n\n` +
+        `User Name: ${name}\n` +
+        `Email: ${email}\n` +
+        `Category: ${category}\n` +
+        (utr ? `UTR Reference: ${utr}\n` : ``) +
+        `\nMessage:\n${message}\n\n` +
+        `Sent via Wingo 11 Help Center`
+      );
+
+      showToast("Redirecting to your email client...", "info");
+      window.location.href = `mailto:brosekhar12@gmail.com?subject=${subject}&body=${body}`;
+    };
+  </script>
+</body>
+</html>

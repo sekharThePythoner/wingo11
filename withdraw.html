@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Withdraw Funds | Wingo 11</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💸</text></svg>">
+  <style>
+    .withdraw-container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .notice-box {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="container">
+    <div class="withdraw-container">
+      <div class="page-header" style="text-align: left;">
+        <h1 class="page-title">💸 Withdraw Winnings</h1>
+        <p class="page-subtitle">Fast & secure payouts directly to your UPI ID within 24 hours.</p>
+      </div>
+
+      <!-- 24H Guarantee Notice -->
+      <div class="notice-box">
+        <div style="font-size: 1.5rem; line-height: 1;">⏱️</div>
+        <div>
+          <div style="font-weight: 700; color: var(--accent-gold); margin-bottom: 2px;">24 Hours Payout Guarantee</div>
+          <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+            Once you submit your withdrawal request, our automated banking system will process and pay directly to your specified UPI ID within <strong>24 hours</strong>. Minimum withdrawal is <strong>₹50</strong>.
+          </div>
+        </div>
+      </div>
+
+      <!-- Withdrawal Form -->
+      <div class="glass-card" style="margin-bottom: 2rem;">
+        <!-- Available Balance -->
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--radius-md); padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Available For Withdrawal</div>
+            <div style="font-family: var(--font-mono); font-size: 1.8rem; font-weight: 800; color: #34d399;">
+              ₹<span id="withdraw-available-bal">0.00</span>
+            </div>
+          </div>
+          <a href="deposit.html" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.4rem 0.9rem;">+ Deposit</a>
+        </div>
+
+        <!-- Withdraw Amount -->
+        <div class="form-group">
+          <label class="form-label">Withdrawal Amount (₹) - Min ₹50:</label>
+          <div class="input-prefix-box">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="withdraw-amount-input" class="form-input" placeholder="Enter amount (min ₹50)" min="50" step="10">
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 6px;">
+            <button class="chip-btn" id="btn-quick-50">₹50</button>
+            <button class="chip-btn" id="btn-quick-100">₹100</button>
+            <button class="chip-btn" id="btn-quick-500">₹500</button>
+            <button class="chip-btn" id="btn-quick-max">Withdraw All (100%)</button>
+          </div>
+        </div>
+
+        <!-- UPI ID -->
+        <div class="form-group">
+          <label class="form-label">Your UPI ID (VPA):</label>
+          <input type="text" id="withdraw-upi-input" class="form-input" placeholder="e.g. mobile@okhdfcbank or name@paytm">
+          <span style="font-size: 0.78rem; color: var(--text-dim); margin-top: 3px;">
+            Please double-check your UPI ID. Funds are sent directly to this address.
+          </span>
+        </div>
+
+        <!-- Confirmation Button -->
+        <button id="submit-withdraw-btn" class="btn btn-gold" style="width: 100%; padding: 0.9rem; font-size: 1.05rem; margin-top: 1rem;">
+          🚀 Request Withdrawal
+        </button>
+      </div>
+
+      <!-- Recent Withdrawals Ledger -->
+      <div class="glass-card">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">📋 Your Withdrawal Requests</h3>
+        <div id="withdrawals-list">
+          <div style="text-align: center; color: var(--text-dim); padding: 1.5rem; font-size: 0.9rem;">
+            No withdrawal requests made yet.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { setupNavbar, startAuthWatcher, showToast, currentUser } from "./shared.js";
+    import { createWithdrawal, db } from "./firebase-config.js";
+    import { collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { sound } from "./audio.js";
+
+    setupNavbar("withdraw");
+
+    const balEl = document.getElementById("withdraw-available-bal");
+    const amountInput = document.getElementById("withdraw-amount-input");
+    const upiInput = document.getElementById("withdraw-upi-input");
+    const submitBtn = document.getElementById("submit-withdraw-btn");
+    const listEl = document.getElementById("withdrawals-list");
+
+    startAuthWatcher((userProfile) => {
+      if (userProfile) {
+        balEl.textContent = parseFloat(userProfile.balance || 0).toFixed(2);
+        loadWithdrawalHistory(userProfile.uid);
+      }
+    });
+
+    document.getElementById("btn-quick-50").onclick = () => { amountInput.value = 50; };
+    document.getElementById("btn-quick-100").onclick = () => { amountInput.value = 100; };
+    document.getElementById("btn-quick-500").onclick = () => { amountInput.value = 500; };
+    document.getElementById("btn-quick-max").onclick = () => {
+      if (currentUser) amountInput.value = Math.floor(currentUser.balance || 0);
+    };
+
+    async function loadWithdrawalHistory(userId) {
+      try {
+        const q = query(collection(db, "withdrawals"), where("userId", "==", userId), limit(10));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          listEl.innerHTML = snap.docs.map(doc => {
+            const data = doc.data();
+            return `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--border-subtle);">
+                <div>
+                  <div style="font-weight: 700; font-family: var(--font-mono); color: #fff;">₹${data.amount.toFixed(2)}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-dim);">UPI: ${data.upiId}</div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; background: rgba(245,158,11,0.15); color: var(--accent-gold); border: 1px solid rgba(245,158,11,0.3);">
+                    ⏳ Within 24hrs
+                  </span>
+                </div>
+              </div>
+            `;
+          }).join("");
+        }
+      } catch (e) {
+        console.warn("History fetch notice:", e);
+      }
+    }
+
+    submitBtn.onclick = async () => {
+      if (!currentUser) {
+        showToast("Please sign in with Google to withdraw funds!", "info");
+        return;
+      }
+
+      const amount = parseFloat(amountInput.value);
+      const upiId = upiInput.value.trim();
+
+      if (isNaN(amount) || amount < 50) {
+        showToast("Minimum withdrawal amount is ₹50!", "error");
+        return;
+      }
+
+      if (amount > currentUser.balance) {
+        showToast(`Insufficient balance! Your current balance is ₹${currentUser.balance.toFixed(2)}`, "error");
+        return;
+      }
+
+      if (!upiId || !upiId.includes("@")) {
+        showToast("Please enter a valid UPI ID (e.g. name@okhdfcbank)!", "error");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Processing Request...";
+
+      try {
+        await createWithdrawal(currentUser.uid, currentUser.gameUid, amount, upiId);
+        sound.playWin();
+        showToast(`Withdrawal of ₹${amount.toFixed(2)} requested! Within 24hrs we will pay into your UPI (${upiId}).`, "success");
+        amountInput.value = "";
+        upiInput.value = "";
+        loadWithdrawalHistory(currentUser.uid);
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "🚀 Request Withdrawal";
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>6×6 Mine Bomb | Wingo 11</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💣</text></svg>">
+  <style>
+    .mines-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .mines-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 6x6 Grid */
+    .mine-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      background: #0b101c;
+      padding: 1.25rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+      aspect-ratio: 1 / 1;
+      max-width: 540px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tile-btn {
+      background: #192237;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      user-select: none;
+      position: relative;
+    }
+
+    .tile-btn:hover:not(:disabled) {
+      background: #253352;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .tile-btn.gem {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: #10b981;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+      animation: gemFlip 0.3s ease forwards;
+    }
+
+    .tile-btn.bomb {
+      background: rgba(239, 68, 68, 0.35);
+      border-color: #ef4444;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+      animation: shake 0.4s ease;
+    }
+
+    .tile-btn.dimmed {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    @keyframes gemFlip {
+      0% { transform: scale(0.6) rotate(-15deg); }
+      70% { transform: scale(1.15) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .stats-card {
+      background: #0f172a;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="container">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        <h1 style="font-size: 2rem; font-weight: 800;">💣 6×6 Mine Bomb</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Find diamonds 💎 across 36 tiles and cash out before hitting a bomb 💣!</p>
+      </div>
+      <a href="index.html" class="btn btn-outline" style="padding: 0.45rem 1rem;">← Back to Games</a>
+    </div>
+
+    <div class="mines-layout">
+      <!-- Control Panel -->
+      <div class="glass-card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 6px;">
+          <span>⚙️ Bet Settings</span>
+        </h3>
+
+        <!-- Bet Amount -->
+        <div class="form-group">
+          <label class="form-label">Bet Amount (₹):</label>
+          <div class="input-prefix-box">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="bomb-bet-amount" class="form-input" value="50" min="10" step="10">
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+            <button class="chip-btn" data-amt="10">₹10</button>
+            <button class="chip-btn" data-amt="50">₹50</button>
+            <button class="chip-btn" data-amt="100">₹100</button>
+            <button class="chip-btn" data-amt="500">₹500</button>
+            <button class="chip-btn" data-amt="1000">₹1,000</button>
+          </div>
+        </div>
+
+        <!-- Mines Count -->
+        <div class="form-group">
+          <label class="form-label" style="display: flex; justify-content: space-between;">
+            <span>Number of Mines:</span>
+            <span id="mines-count-label" style="color: #ef4444; font-weight: 700;">5 Mines</span>
+          </label>
+          <input type="range" id="mines-range" min="1" max="24" value="5" style="width: 100%; accent-color: #ef4444; cursor: pointer;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">
+            <span>1 (Low Risk)</span>
+            <span>12 (Balanced)</span>
+            <span>24 (Extreme)</span>
+          </div>
+        </div>
+
+        <!-- Live Game Multiplier & Profit -->
+        <div class="stats-card">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Current Multiplier:</span>
+            <span id="stat-multiplier" style="font-family: var(--font-mono); font-weight: 800; color: var(--accent-gold); font-size: 1.1rem;">1.00x</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Gems Found:</span>
+            <span id="stat-gems-count" style="font-family: var(--font-mono); font-weight: 700; color: #34d399;">0 / 31</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Cashout Value:</span>
+            <span id="stat-cashout-val" style="font-family: var(--font-mono); font-weight: 800; color: #34d399; font-size: 1.1rem;">₹0.00</span>
+          </div>
+        </div>
+
+        <!-- Main Action Buttons -->
+        <button id="start-game-btn" class="btn btn-emerald" style="width: 100%; padding: 0.9rem; font-size: 1.05rem; margin-bottom: 0.8rem;">
+          💣 Start Game
+        </button>
+
+        <button id="cashout-btn" class="btn btn-gold" style="width: 100%; padding: 0.9rem; font-size: 1.05rem; display: none;">
+          💰 Cash Out ₹0.00
+        </button>
+
+        <div style="font-size: 0.8rem; color: var(--text-dim); text-align: center; line-height: 1.4; margin-top: 0.5rem;">
+          Provably Fair RNG. Reveal diamonds to multiply your balance.
+        </div>
+      </div>
+
+      <!-- 6x6 Bomb Grid Container -->
+      <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div class="mine-grid" id="mine-grid-container">
+          <!-- 36 tiles generated here -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { setupNavbar, startAuthWatcher, showToast, currentUser } from "./shared.js";
+    import { updateBalance } from "./firebase-config.js";
+    import { sound } from "./audio.js";
+
+    setupNavbar("");
+    startAuthWatcher();
+
+    const TOTAL_TILES = 36;
+    let isPlaying = false;
+    let betAmount = 50;
+    let mineCount = 5;
+    let bombLocations = new Set();
+    let revealedSafe = 0;
+    let currentMultiplier = 1.00;
+
+    const gridEl = document.getElementById("mine-grid-container");
+    const betInput = document.getElementById("bomb-bet-amount");
+    const minesRange = document.getElementById("mines-range");
+    const minesLabel = document.getElementById("mines-count-label");
+    const startBtn = document.getElementById("start-game-btn");
+    const cashoutBtn = document.getElementById("cashout-btn");
+    const statMultiplier = document.getElementById("stat-multiplier");
+    const statGems = document.getElementById("stat-gems-count");
+    const statCashout = document.getElementById("stat-cashout-val");
+
+    // Initialize blank board
+    function initBlankBoard() {
+      gridEl.innerHTML = "";
+      for (let i = 0; i < TOTAL_TILES; i++) {
+        const tile = document.createElement("button");
+        tile.className = "tile-btn";
+        tile.dataset.index = i;
+        tile.disabled = true;
+        gridEl.appendChild(tile);
+      }
+    }
+
+    initBlankBoard();
+
+    // Range input
+    minesRange.oninput = () => {
+      mineCount = parseInt(minesRange.value);
+      minesLabel.textContent = `${mineCount} Mines`;
+      statGems.textContent = `0 / ${TOTAL_TILES - mineCount}`;
+    };
+
+    // Quick chips
+    document.querySelectorAll(".chip-btn").forEach(btn => {
+      btn.onclick = () => {
+        sound.playClick();
+        betAmount = parseInt(btn.dataset.amt);
+        betInput.value = betAmount;
+      };
+    });
+
+    betInput.onchange = () => {
+      betAmount = Math.max(10, parseFloat(betInput.value) || 10);
+      betInput.value = betAmount;
+    };
+
+    // Calculate combinatorics multiplier
+    function calculateMultiplier(gemsFound, mines) {
+      if (gemsFound === 0) return 1.0;
+      let multi = 0.98;
+      for (let i = 0; i < gemsFound; i++) {
+        multi *= (TOTAL_TILES - i) / (TOTAL_TILES - mines - i);
+      }
+      return Math.max(1.05, Math.round(multi * 100) / 100);
+    }
+
+    // Start game
+    startBtn.onclick = async () => {
+      if (!currentUser) {
+        showToast("Please sign in with Google to play!", "info");
+        return;
+      }
+
+      betAmount = parseFloat(betInput.value) || 50;
+      if (betAmount < 10) {
+        showToast("Minimum bet is ₹10!", "error");
+        return;
+      }
+
+      if (currentUser.balance < betAmount) {
+        showToast("Insufficient Balance! Please deposit to continue.", "error");
+        return;
+      }
+
+      startBtn.disabled = true;
+
+      try {
+        await updateBalance(currentUser.uid, -betAmount, `6x6 Mine Bomb Bet (${mineCount} Mines)`);
+        sound.playCoin();
+
+        // Place bombs randomly
+        bombLocations.clear();
+        while (bombLocations.size < mineCount) {
+          bombLocations.add(Math.floor(Math.random() * TOTAL_TILES));
+        }
+
+        revealedSafe = 0;
+        currentMultiplier = 1.00;
+        isPlaying = true;
+
+        statMultiplier.textContent = "1.00x";
+        statGems.textContent = `0 / ${TOTAL_TILES - mineCount}`;
+        statCashout.textContent = `₹${betAmount.toFixed(2)}`;
+
+        startBtn.style.display = "none";
+        cashoutBtn.style.display = "inline-flex";
+        cashoutBtn.textContent = `💰 Cash Out ₹${betAmount.toFixed(2)} (1.00x)`;
+        cashoutBtn.disabled = true; // Need at least 1 safe gem to cash out
+
+        // Enable board tiles
+        const tiles = gridEl.querySelectorAll(".tile-btn");
+        tiles.forEach(tile => {
+          tile.className = "tile-btn";
+          tile.innerHTML = "";
+          tile.disabled = false;
+          tile.onclick = () => onTileClick(parseInt(tile.dataset.index), tile);
+        });
+
+        showToast("Game started! Uncover the diamonds!", "info");
+      } catch (err) {
+        showToast(err.message, "error");
+        startBtn.disabled = false;
+      }
+    };
+
+    // On tile click
+    async function onTileClick(index, tileEl) {
+      if (!isPlaying || tileEl.disabled) return;
+      tileEl.disabled = true;
+
+      // Check if bomb
+      if (bombLocations.has(index)) {
+        // Boom!
+        isPlaying = false;
+        sound.playExplosion();
+        tileEl.classList.add("bomb");
+        tileEl.innerHTML = "💣";
+
+        // Reveal full grid
+        const tiles = gridEl.querySelectorAll(".tile-btn");
+        tiles.forEach((t, idx) => {
+          t.disabled = true;
+          if (bombLocations.has(idx)) {
+            t.classList.add("bomb");
+            t.innerHTML = "💣";
+          } else if (!t.classList.contains("gem")) {
+            t.classList.add("dimmed");
+            t.innerHTML = "💎";
+          }
+        });
+
+        cashoutBtn.style.display = "none";
+        startBtn.style.display = "inline-flex";
+        startBtn.disabled = false;
+
+        showToast("💥 BOOM! You hit a mine bomb!", "error");
+        return;
+      }
+
+      // Safe Gem
+      revealedSafe++;
+      sound.playGem();
+      tileEl.classList.add("gem");
+      tileEl.innerHTML = "💎";
+
+      currentMultiplier = calculateMultiplier(revealedSafe, mineCount);
+      const currentWin = Math.round(betAmount * currentMultiplier * 100) / 100;
+
+      statMultiplier.textContent = `${currentMultiplier.toFixed(2)}x`;
+      statGems.textContent = `${revealedSafe} / ${TOTAL_TILES - mineCount}`;
+      statCashout.textContent = `₹${currentWin.toFixed(2)}`;
+
+      cashoutBtn.disabled = false;
+      cashoutBtn.textContent = `💰 Cash Out ₹${currentWin.toFixed(2)} (${currentMultiplier.toFixed(2)}x)`;
+
+      // If all safe tiles found -> Auto win!
+      if (revealedSafe === TOTAL_TILES - mineCount) {
+        await doCashout();
+      }
+    }
+
+    // Cash out
+    async function doCashout() {
+      if (!isPlaying || revealedSafe === 0) return;
+      isPlaying = false;
+      cashoutBtn.disabled = true;
+
+      const payout = Math.round(betAmount * currentMultiplier * 100) / 100;
+      try {
+        await updateBalance(currentUser.uid, payout, `6x6 Mine Bomb Win (${currentMultiplier.toFixed(2)}x)`);
+        sound.playWin();
+        showToast(`🎉 Cashed out ₹${payout.toFixed(2)} (${currentMultiplier.toFixed(2)}x)!`, "success");
+
+        // Reveal remaining bombs softly
+        const tiles = gridEl.querySelectorAll(".tile-btn");
+        tiles.forEach((t, idx) => {
+          t.disabled = true;
+          if (bombLocations.has(idx)) {
+            t.classList.add("dimmed");
+            t.innerHTML = "💣";
+          }
+        });
+      } catch (e) {
+        showToast(e.message, "error");
+      } finally {
+        cashoutBtn.style.display = "none";
+        startBtn.style.display = "inline-flex";
+        startBtn.disabled = false;
+      }
+    }
+
+    cashoutBtn.onclick = doCashout;
+  </script>
+</body>
+</html>

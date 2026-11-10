@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Send & Claim Gifts | Wingo 11</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎁</text></svg>">
+  <style>
+    .gift-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Mystery Gift Box Card */
+    .gift-box-card {
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.6) 0%, rgba(15, 23, 42, 0.9) 100%);
+      border: 2px dashed rgba(139, 92, 246, 0.4);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gift-box-card:hover {
+      border-color: #8b5cf6;
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+      transform: translateY(-4px);
+    }
+
+    .mystery-icon {
+      font-size: 4rem;
+      margin-bottom: 0.6rem;
+      filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.6));
+      animation: float 2.5s ease-in-out infinite;
+      cursor: pointer;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="container">
+    <div class="page-header" style="text-align: left; margin-bottom: 1.5rem;">
+      <h1 class="page-title">🎁 Money Gifts</h1>
+      <p class="page-subtitle">Send real balance gifts to your friends via their Game UID, or reveal mystery gifts sent to you!</p>
+    </div>
+
+    <div class="gift-grid">
+      <!-- Send Gift Card -->
+      <div class="glass-card">
+        <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 8px;">
+          <span>🚀 Send Money Gift</span>
+        </h2>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.2rem;">
+          Transfer money to any player instantly by providing their unique Game UID.
+        </p>
+
+        <!-- Recipient UID -->
+        <div class="form-group">
+          <label class="form-label">Recipient Game UID:</label>
+          <input type="text" id="gift-receiver-uid" class="form-input" placeholder="e.g. W11-482910">
+          <span style="font-size: 0.78rem; color: var(--text-dim); margin-top: 3px;">
+            Ask your friend for their Game UID from their Account or top bar.
+          </span>
+        </div>
+
+        <!-- Gift Amount -->
+        <div class="form-group">
+          <label class="form-label">Gift Amount (₹):</label>
+          <div class="input-prefix-box">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="gift-amount-input" class="form-input" placeholder="Min ₹10" min="10" step="10">
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+            <button class="chip-btn" data-gamt="50">₹50</button>
+            <button class="chip-btn" data-gamt="100">₹100</button>
+            <button class="chip-btn" data-gamt="200">₹200</button>
+            <button class="chip-btn" data-gamt="500">₹500</button>
+          </div>
+        </div>
+
+        <!-- Custom Greeting Note -->
+        <div class="form-group">
+          <label class="form-label">Greeting Message (Optional):</label>
+          <input type="text" id="gift-message-input" class="form-input" placeholder="Best of luck bro! Have fun! 🎉">
+        </div>
+
+        <button id="send-gift-btn" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem; margin-top: 0.5rem;">
+          🎁 Send Gift Now
+        </button>
+      </div>
+
+      <!-- Received Mystery Gifts Card -->
+      <div class="glass-card">
+        <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 8px;">
+          <span>📦 Unclaimed Gifts For You</span>
+        </h2>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.2rem;">
+          Click "Reveal Gift" to unwrap the surprise and credit the money directly to your balance!
+        </p>
+
+        <div id="received-gifts-list">
+          <div style="text-align: center; color: var(--text-dim); padding: 2.5rem 1rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📭</div>
+            <div>No pending gifts right now. Share your Game UID (<span id="user-share-uid" style="color: var(--accent-gold); font-family: var(--font-mono);">W11-XXXXXX</span>) with friends to receive gifts!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { setupNavbar, startAuthWatcher, showToast, currentUser } from "./shared.js";
+    import { sendGift, claimGift, db } from "./firebase-config.js";
+    import { collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { sound } from "./audio.js";
+
+    setupNavbar("gift");
+
+    const receiverInput = document.getElementById("gift-receiver-uid");
+    const amountInput = document.getElementById("gift-amount-input");
+    const msgInput = document.getElementById("gift-message-input");
+    const sendBtn = document.getElementById("send-gift-btn");
+    const giftsListEl = document.getElementById("received-gifts-list");
+    const userShareUidEl = document.getElementById("user-share-uid");
+
+    startAuthWatcher((userProfile) => {
+      if (userProfile) {
+        userShareUidEl.textContent = userProfile.gameUid || "W11-USER";
+        listenForIncomingGifts(userProfile.gameUid);
+      }
+    });
+
+    // Quick chip buttons
+    document.querySelectorAll(".chip-btn").forEach(btn => {
+      btn.onclick = () => {
+        sound.playClick();
+        amountInput.value = btn.dataset.gamt;
+      };
+    });
+
+    // Send Gift Action
+    sendBtn.onclick = async () => {
+      if (!currentUser) {
+        showToast("Please sign in with Google to send a gift!", "info");
+        return;
+      }
+
+      const receiverUid = receiverInput.value.trim().toUpperCase();
+      const amount = parseFloat(amountInput.value);
+      const note = msgInput.value.trim();
+
+      if (!receiverUid || !receiverUid.startsWith("W11-")) {
+        showToast("Please enter a valid recipient Game UID (format: W11-XXXXXX)!", "error");
+        return;
+      }
+
+      if (isNaN(amount) || amount < 10) {
+        showToast("Minimum gift amount is ₹10!", "error");
+        return;
+      }
+
+      if (amount > currentUser.balance) {
+        showToast(`Insufficient balance! Your current balance is ₹${currentUser.balance.toFixed(2)}`, "error");
+        return;
+      }
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Sending Gift...";
+
+      try {
+        await sendGift(currentUser, receiverUid, amount, note);
+        sound.playWin();
+        showToast(`🎉 Gift of ₹${amount.toFixed(2)} sent to ${receiverUid}!`, "success");
+        receiverInput.value = "";
+        amountInput.value = "";
+        msgInput.value = "";
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = "🎁 Send Gift Now";
+      }
+    };
+
+    // Real-time listener for incoming gifts
+    function listenForIncomingGifts(gameUid) {
+      try {
+        const q = query(
+          collection(db, "gifts"),
+          where("receiverGameUid", "==", gameUid),
+          where("isClaimed", "==", false)
+        );
+
+        onSnapshot(q, (snapshot) => {
+          if (snapshot.empty) {
+            renderEmptyGifts();
+            return;
+          }
+
+          giftsListEl.innerHTML = "";
+          snapshot.forEach((doc) => {
+            const gift = doc.data();
+            const giftId = doc.id;
+
+            const card = document.createElement("div");
+            card.className = "gift-box-card";
+            card.innerHTML = `
+              <div class="mystery-icon">🎁</div>
+              <div style="font-weight: 800; font-size: 1.15rem; color: #fff; margin-bottom: 4px;">Mystery Gift Received!</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">From: <strong>${gift.senderName} (${gift.senderGameUid})</strong></div>
+              <div style="font-style: italic; color: var(--accent-gold); font-size: 0.9rem; margin-bottom: 1rem;">"${gift.message}"</div>
+              <button class="btn btn-gold reveal-btn" data-id="${giftId}" style="width: 100%;">
+                ✨ Reveal Gift
+              </button>
+            `;
+
+            card.querySelector(".reveal-btn").onclick = async () => {
+              const btn = card.querySelector(".reveal-btn");
+              btn.disabled = true;
+              btn.textContent = "Unwrapping...";
+              try {
+                const claimedAmount = await claimGift(giftId, currentUser);
+                sound.playWin();
+                showToast(`🎉 Congratulations! You revealed and claimed ₹${claimedAmount.toFixed(2)}!`, "success");
+              } catch (err) {
+                showToast(err.message, "error");
+                btn.disabled = false;
+                btn.textContent = "✨ Reveal Gift";
+              }
+            };
+
+            giftsListEl.appendChild(card);
+          });
+        });
+      } catch (e) {
+        console.warn("Incoming gifts fetch notice:", e);
+      }
+    }
+
+    function renderEmptyGifts() {
+      giftsListEl.innerHTML = `
+        <div style="text-align: center; color: var(--text-dim); padding: 2.5rem 1rem;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📭</div>
+          <div>No pending gifts right now. Share your Game UID (<span style="color: var(--accent-gold); font-family: var(--font-mono);">${currentUser?.gameUid || 'W11-XXXXXX'}</span>) with friends to receive gifts!</div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

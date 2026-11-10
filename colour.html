@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Colour Prediction (60s) | Wingo 11</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎨</text></svg>">
+  <style>
+    /* Colour Game Specific Styles */
+    .timer-card {
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      margin-bottom: 1.5rem;
+    }
+
+    .countdown-display {
+      font-family: var(--font-mono);
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+    }
+
+    .countdown-box {
+      background: #090d16;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Color Selection Buttons */
+    .color-select-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .color-btn {
+      padding: 1.4rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 1.2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 2px solid transparent;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+
+    .color-btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, #10b981, #047857);
+      color: white;
+      box-shadow: 0 8px 25px var(--accent-emerald-glow);
+    }
+    .btn-green:hover { filter: brightness(1.15); }
+
+    .btn-violet {
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: white;
+      box-shadow: 0 8px 25px var(--accent-violet-glow);
+    }
+    .btn-violet:hover { filter: brightness(1.15); }
+
+    .btn-red {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: white;
+      box-shadow: 0 8px 25px var(--accent-crimson-glow);
+    }
+    .btn-red:hover { filter: brightness(1.15); }
+
+    /* Number Selection Grid */
+    .number-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .number-btn {
+      background: #111827;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem 0.5rem;
+      font-size: 1.4rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .number-btn:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .num-color-badge {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* Chip Selector */
+    .chip-row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+    }
+
+    .chip-btn {
+      background: #111827;
+      border: 1px solid var(--border-subtle);
+      color: #e2e8f0;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-full);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .chip-btn.active, .chip-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    /* History table */
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .history-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+      font-weight: 600;
+    }
+
+    .history-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .ball-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .ball-green { background: #10b981; }
+    .ball-red { background: #ef4444; }
+    .ball-violet { background: #8b5cf6; }
+    .ball-red-violet { background: linear-gradient(135deg, #ef4444 50%, #8b5cf6 50%); }
+    .ball-green-violet { background: linear-gradient(135deg, #10b981 50%, #8b5cf6 50%); }
+
+    .lock-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 14, 23, 0.88);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-lg);
+      z-index: 50;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #f87171;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="container">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        <h1 style="font-size: 2rem; font-weight: 800;">🎨 Colour Prediction</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Predict Color (2X/4.5X) or Exact Number (9X) every 60 seconds</p>
+      </div>
+      <a href="index.html" class="btn btn-outline" style="padding: 0.45rem 1rem;">← Back to Games</a>
+    </div>
+
+    <!-- Timer and Round Period Card -->
+    <div class="timer-card">
+      <div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Current Period</div>
+        <div id="current-period-id" style="font-family: var(--font-mono); font-size: 1.4rem; font-weight: 800; color: var(--accent-gold);">20261110001</div>
+      </div>
+
+      <div style="text-align: right;">
+        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Time Remaining</div>
+        <div class="countdown-display">
+          <span class="countdown-box" id="time-min">00</span>
+          <span>:</span>
+          <span class="countdown-box" id="time-sec">60</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Betting Area (Relative for betting lock) -->
+    <div style="position: relative;">
+      <!-- Lock Overlay during final 5 seconds -->
+      <div class="lock-overlay" id="bet-lock-overlay">
+        <div>
+          <div style="font-size: 2.5rem; margin-bottom: 8px;">🔒</div>
+          <div>BETTING CLOSED</div>
+          <div style="font-size: 1rem; color: var(--text-muted); font-weight: 500; margin-top: 4px;">Calculating winning parity result...</div>
+        </div>
+      </div>
+
+      <!-- Color Select Buttons -->
+      <div class="color-select-grid">
+        <button class="color-btn btn-green" data-target="GREEN">
+          <span>🟢 Green</span>
+          <span style="font-size: 0.8rem; opacity: 0.9;">2X Payout</span>
+        </button>
+        <button class="color-btn btn-violet" data-target="VIOLET">
+          <span>🟣 Violet</span>
+          <span style="font-size: 0.8rem; opacity: 0.9;">4.5X Payout</span>
+        </button>
+        <button class="color-btn btn-red" data-target="RED">
+          <span>🔴 Red</span>
+          <span style="font-size: 0.8rem; opacity: 0.9;">2X Payout</span>
+        </button>
+      </div>
+
+      <!-- Number Select Grid (0 - 9) -->
+      <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; justify-content: space-between;">
+          <span>SELECT LUCKY NUMBER</span>
+          <span style="color: var(--accent-gold); font-family: var(--font-mono);">9X Payout</span>
+        </div>
+        <div class="number-grid">
+          <button class="number-btn" data-target="0">0 <span class="num-color-badge" style="background: linear-gradient(135deg, #ef4444 50%, #8b5cf6 50%);"></span></button>
+          <button class="number-btn" data-target="1">1 <span class="num-color-badge" style="background: #10b981;"></span></button>
+          <button class="number-btn" data-target="2">2 <span class="num-color-badge" style="background: #ef4444;"></span></button>
+          <button class="number-btn" data-target="3">3 <span class="num-color-badge" style="background: #10b981;"></span></button>
+          <button class="number-btn" data-target="4">4 <span class="num-color-badge" style="background: #ef4444;"></span></button>
+          <button class="number-btn" data-target="5">5 <span class="num-color-badge" style="background: linear-gradient(135deg, #10b981 50%, #8b5cf6 50%);"></span></button>
+          <button class="number-btn" data-target="6">6 <span class="num-color-badge" style="background: #ef4444;"></span></button>
+          <button class="number-btn" data-target="7">7 <span class="num-color-badge" style="background: #10b981;"></span></button>
+          <button class="number-btn" data-target="8">8 <span class="num-color-badge" style="background: #ef4444;"></span></button>
+          <button class="number-btn" data-target="9">9 <span class="num-color-badge" style="background: #10b981;"></span></button>
+        </div>
+
+        <!-- Bet Amount Chips -->
+        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.6rem;">Select Bet Amount (₹):</div>
+        <div class="chip-row">
+          <button class="chip-btn active" data-amount="10">₹10</button>
+          <button class="chip-btn" data-amount="50">₹50</button>
+          <button class="chip-btn" data-amount="100">₹100</button>
+          <button class="chip-btn" data-amount="500">₹500</button>
+          <button class="chip-btn" data-amount="1000">₹1,000</button>
+          <button class="chip-btn" data-amount="2000">₹2,000</button>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 0.8rem; border-top: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 0.8rem;">
+          <div style="font-size: 0.95rem;">
+            Selected Bet: <strong id="selected-selection-label" style="color: var(--accent-gold);">None</strong> | 
+            Amount: <strong id="selected-amount-label" style="color: #34d399; font-family: var(--font-mono);">₹10</strong>
+          </div>
+          <button class="btn btn-primary" id="confirm-bet-btn" style="min-width: 140px;">Place Bet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Bets & Game History Tabs -->
+    <div class="glass-card">
+      <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.8rem; margin-bottom: 1rem;">
+        <button id="tab-parity" class="btn btn-outline" style="border: none; color: #fff; font-weight: 700; background: rgba(255,255,255,0.06);">Recent Parity Results</button>
+        <button id="tab-mybets" class="btn btn-outline" style="border: none; color: var(--text-muted);">My Bets</button>
+      </div>
+
+      <div id="parity-content">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Number</th>
+              <th>Result</th>
+              <th>Outcome</th>
+            </tr>
+          </thead>
+          <tbody id="parity-table-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="mybets-content" style="display: none;">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Selection</th>
+              <th>Bet Amount</th>
+              <th>Status / Win</th>
+            </tr>
+          </thead>
+          <tbody id="mybets-table-body">
+            <tr><td colspan="4" style="text-align: center; color: var(--text-dim); padding: 1.5rem;">No bets placed in this session yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Winner Modal -->
+  <div class="modal-overlay" id="round-result-modal">
+    <div class="modal-box" style="text-align: center;">
+      <div style="font-size: 3.5rem; margin-bottom: 0.5rem;" id="modal-result-icon">🎉</div>
+      <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;" id="modal-result-title">Round Result</h2>
+      <div style="margin: 1.2rem 0; display: flex; align-items: center; justify-content: center; gap: 1rem;">
+        <div id="modal-ball-view" class="ball-tag" style="width: 52px; height: 52px; font-size: 1.6rem;">0</div>
+        <div style="text-align: left;">
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Period: <span id="modal-period-text"></span></div>
+          <div style="font-size: 1.1rem; font-weight: 800;" id="modal-color-text">Green</div>
+        </div>
+      </div>
+      <p id="modal-bet-summary" style="font-size: 1rem; color: var(--text-muted); margin-bottom: 1.5rem;"></p>
+      <button class="btn btn-primary" id="modal-close-btn" style="width: 100%;">Continue Playing</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { setupNavbar, startAuthWatcher, showToast, currentUser } from "./shared.js";
+    import { updateBalance } from "./firebase-config.js";
+    import { sound } from "./audio.js";
+
+    setupNavbar("");
+    startAuthWatcher();
+
+    let timeLeft = 60;
+    let periodIndex = 101;
+    let selectedSelection = null;
+    let selectedAmount = 10;
+    let activeBets = [];
+    let pastResults = [
+      { period: "20261110098", number: 7, color: "GREEN" },
+      { period: "20261110099", number: 0, color: "RED-VIOLET" },
+      { period: "20261110100", number: 4, color: "RED" }
+    ];
+
+    const currentPeriodEl = document.getElementById("current-period-id");
+    const timeMinEl = document.getElementById("time-min");
+    const timeSecEl = document.getElementById("time-sec");
+    const betLockOverlay = document.getElementById("bet-lock-overlay");
+    const confirmBetBtn = document.getElementById("confirm-bet-btn");
+    const parityTbody = document.getElementById("parity-table-body");
+    const mybetsTbody = document.getElementById("mybets-table-body");
+
+    function getPeriodString(num) {
+      const d = new Date();
+      const yr = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${yr}${m}${day}${String(num).padStart(3, '0')}`;
+    }
+
+    function renderParityHistory() {
+      parityTbody.innerHTML = pastResults.slice(0, 10).map(r => {
+        let ballClass = "ball-green";
+        let colorText = "Green";
+        if (r.color === "RED") { ballClass = "ball-red"; colorText = "Red"; }
+        else if (r.color === "VIOLET") { ballClass = "ball-violet"; colorText = "Violet"; }
+        else if (r.color === "RED-VIOLET") { ballClass = "ball-red-violet"; colorText = "Red + Violet"; }
+        else if (r.color === "GREEN-VIOLET") { ballClass = "ball-green-violet"; colorText = "Green + Violet"; }
+
+        return `
+          <tr>
+            <td style="font-family: var(--font-mono); font-weight: 600;">${r.period}</td>
+            <td><span class="ball-tag ${ballClass}">${r.number}</span></td>
+            <td><strong>${r.number >= 5 ? 'Big' : 'Small'}</strong></td>
+            <td><span style="font-weight: 700;">${colorText}</span></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderMyBets() {
+      if (activeBets.length === 0) {
+        mybetsTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-dim); padding: 1.5rem;">No bets placed in this session yet.</td></tr>`;
+        return;
+      }
+      mybetsTbody.innerHTML = activeBets.map(b => `
+        <tr>
+          <td style="font-family: var(--font-mono);">${b.period}</td>
+          <td><strong>${b.selection}</strong></td>
+          <td style="font-family: var(--font-mono);">₹${b.amount}</td>
+          <td>${b.status}</td>
+        </tr>
+      `).join("");
+    }
+
+    // Chip select
+    document.querySelectorAll(".chip-btn").forEach(btn => {
+      btn.onclick = () => {
+        sound.playClick();
+        document.querySelectorAll(".chip-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedAmount = parseInt(btn.dataset.amount);
+        document.getElementById("selected-amount-label").textContent = `₹${selectedAmount}`;
+      };
+    });
+
+    // Color select
+    document.querySelectorAll(".color-btn").forEach(btn => {
+      btn.onclick = () => {
+        sound.playClick();
+        selectedSelection = btn.dataset.target;
+        document.getElementById("selected-selection-label").textContent = btn.dataset.target;
+      };
+    });
+
+    // Number select
+    document.querySelectorAll(".number-btn").forEach(btn => {
+      btn.onclick = () => {
+        sound.playClick();
+        selectedSelection = btn.dataset.target;
+        document.getElementById("selected-selection-label").textContent = `Number ${btn.dataset.target}`;
+      };
+    });
+
+    // Tabs
+    document.getElementById("tab-parity").onclick = () => {
+      document.getElementById("parity-content").style.display = "block";
+      document.getElementById("mybets-content").style.display = "none";
+      document.getElementById("tab-parity").style.background = "rgba(255,255,255,0.06)";
+      document.getElementById("tab-mybets").style.background = "transparent";
+    };
+
+    document.getElementById("tab-mybets").onclick = () => {
+      document.getElementById("parity-content").style.display = "none";
+      document.getElementById("mybets-content").style.display = "block";
+      document.getElementById("tab-mybets").style.background = "rgba(255,255,255,0.06)";
+      document.getElementById("tab-parity").style.background = "transparent";
+    };
+
+    // Place bet handler
+    confirmBetBtn.onclick = async () => {
+      if (!currentUser) {
+        showToast("Please sign in with Google to play!", "info");
+        return;
+      }
+      if (!selectedSelection) {
+        showToast("Please select a Color or Number first!", "error");
+        return;
+      }
+      if (timeLeft <= 5) {
+        showToast("Betting is locked for current round!", "error");
+        return;
+      }
+      if (currentUser.balance < selectedAmount) {
+        showToast("Insufficient Balance! Please deposit to continue.", "error");
+        return;
+      }
+
+      confirmBetBtn.disabled = true;
+      try {
+        await updateBalance(currentUser.uid, -selectedAmount, `Colour Bet on ${selectedSelection}`);
+        activeBets.unshift({
+          period: getPeriodString(periodIndex),
+          selection: selectedSelection,
+          amount: selectedAmount,
+          status: `<span style="color: var(--accent-gold); font-weight: 700;">Pending</span>`
+        });
+        renderMyBets();
+        sound.playCoin();
+        showToast(`Bet placed on ${selectedSelection} for ₹${selectedAmount}!`, "success");
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        confirmBetBtn.disabled = false;
+      }
+    };
+
+    // Countdown Timer Loop (60 seconds)
+    function startTimer() {
+      currentPeriodEl.textContent = getPeriodString(periodIndex);
+      renderParityHistory();
+
+      setInterval(async () => {
+        timeLeft--;
+        if (timeLeft < 0) {
+          timeLeft = 60;
+          periodIndex++;
+          currentPeriodEl.textContent = getPeriodString(periodIndex);
+        }
+
+        const sec = timeLeft % 60;
+        timeSecEl.textContent = String(sec).padStart(2, '0');
+        timeMinEl.textContent = "00";
+
+        // Sound tick in last 5 seconds
+        if (timeLeft <= 5 && timeLeft > 0) {
+          sound.playTick();
+          betLockOverlay.style.display = "flex";
+        } else {
+          betLockOverlay.style.display = "none";
+        }
+
+        // Round evaluation at 0
+        if (timeLeft === 0) {
+          await evaluateRound();
+        }
+      }, 1000);
+    }
+
+    async function evaluateRound() {
+      const winningNumber = Math.floor(Math.random() * 10);
+      let winningColor = "GREEN";
+      if (winningNumber === 0) winningColor = "RED-VIOLET";
+      else if (winningNumber === 5) winningColor = "GREEN-VIOLET";
+      else if ([2, 4, 6, 8].includes(winningNumber)) winningColor = "RED";
+      else winningColor = "GREEN";
+
+      const finishedPeriod = getPeriodString(periodIndex);
+      pastResults.unshift({
+        period: finishedPeriod,
+        number: winningNumber,
+        color: winningColor
+      });
+      renderParityHistory();
+
+      // Check current user bets
+      let wonTotal = 0;
+      let wonAny = false;
+
+      activeBets.forEach(bet => {
+        if (bet.period === finishedPeriod) {
+          let won = false;
+          let multiplier = 0;
+
+          if (bet.selection === "GREEN" && (winningColor === "GREEN" || winningColor === "GREEN-VIOLET")) {
+            won = true;
+            multiplier = winningColor === "GREEN-VIOLET" ? 1.5 : 2.0;
+          } else if (bet.selection === "RED" && (winningColor === "RED" || winningColor === "RED-VIOLET")) {
+            won = true;
+            multiplier = winningColor === "RED-VIOLET" ? 1.5 : 2.0;
+          } else if (bet.selection === "VIOLET" && (winningColor === "RED-VIOLET" || winningColor === "GREEN-VIOLET")) {
+            won = true;
+            multiplier = 4.5;
+          } else if (bet.selection === String(winningNumber)) {
+            won = true;
+            multiplier = 9.0;
+          }
+
+          if (won) {
+            wonAny = true;
+            const payout = bet.amount * multiplier;
+            wonTotal += payout;
+            bet.status = `<span style="color: #34d399; font-weight: 700;">+₹${payout} WIN</span>`;
+          } else {
+            bet.status = `<span style="color: #f87171; font-weight: 700;">Lost</span>`;
+          }
+        }
+      });
+      renderMyBets();
+
+      // Credit winnings
+      if (wonTotal > 0 && currentUser) {
+        sound.playWin();
+        await updateBalance(currentUser.uid, wonTotal, `Win on Colour Round ${finishedPeriod}`);
+      }
+
+      // Show result popup
+      showResultModal(finishedPeriod, winningNumber, winningColor, wonTotal, wonAny);
+    }
+
+    function showResultModal(period, num, color, wonAmt, wonAny) {
+      const modal = document.getElementById("round-result-modal");
+      const icon = document.getElementById("modal-result-icon");
+      const title = document.getElementById("modal-result-title");
+      const ball = document.getElementById("modal-ball-view");
+      const colText = document.getElementById("modal-color-text");
+      const summary = document.getElementById("modal-bet-summary");
+      const periodText = document.getElementById("modal-period-text");
+
+      periodText.textContent = period;
+      ball.textContent = num;
+      ball.className = "ball-tag";
+      if (color === "RED") ball.classList.add("ball-red");
+      else if (color === "GREEN") ball.classList.add("ball-green");
+      else if (color === "RED-VIOLET") ball.classList.add("ball-red-violet");
+      else if (color === "GREEN-VIOLET") ball.classList.add("ball-green-violet");
+
+      colText.textContent = color;
+
+      if (wonTotalForRound(period) > 0) {
+        icon.textContent = "🏆";
+        title.textContent = "Congratulations! You Won!";
+        summary.innerHTML = `<span style="color: #34d399; font-size: 1.3rem; font-weight: 800;">+₹${wonAmt.toFixed(2)} Credited!</span>`;
+      } else {
+        icon.textContent = "🎲";
+        title.textContent = "Round Ended";
+        summary.textContent = `Winning number was ${num} (${color}). Good luck on the next round!`;
+      }
+
+      modal.classList.add("show");
+    }
+
+    function wonTotalForRound(period) {
+      let sum = 0;
+      activeBets.forEach(b => {
+        if (b.period === period && b.status.includes("WIN")) sum += 1;
+      });
+      return sum;
+    }
+
+    document.getElementById("modal-close-btn").onclick = () => {
+      document.getElementById("round-result-modal").classList.remove("show");
+    };
+
+    startTimer();
+  </script>
+</body>
+</html>

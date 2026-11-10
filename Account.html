@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>My Account | Wingo 11</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>">
+  <style>
+    .account-container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .profile-hero {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.2) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 3px solid var(--primary);
+      box-shadow: 0 0 25px var(--primary-glow);
+      object-fit: cover;
+      background: #1e293b;
+    }
+
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+      gap: 12px;
+      margin: 1rem 0;
+    }
+
+    .avatar-choice {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 2px solid var(--border-subtle);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #1e293b;
+    }
+
+    .avatar-choice:hover, .avatar-choice.selected {
+      border-color: #34d399;
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="container">
+    <div class="account-container">
+      <div class="page-header" style="text-align: left;">
+        <h1 class="page-title">👤 Account Settings</h1>
+        <p class="page-subtitle">Manage your profile, change avatar, and view your in-game identity.</p>
+      </div>
+
+      <!-- User Profile Card -->
+      <div class="profile-hero">
+        <img src="" alt="Profile Picture" id="acc-pfp-img" class="hero-avatar">
+        <div style="flex: 1; min-width: 200px;">
+          <h2 id="acc-name-text" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 4px;">Player</h2>
+          <div id="acc-email-text" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">loading...</div>
+
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 99px; padding: 4px 12px; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; color: var(--accent-gold);">
+              UID: <span id="acc-game-uid">W11-XXXXXX</span>
+            </div>
+            <button id="copy-uid-btn" class="btn btn-outline" style="padding: 3px 10px; font-size: 0.78rem;">
+              📋 Copy UID
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Balance Summary -->
+        <div style="text-align: right; background: rgba(10, 14, 23, 0.6); padding: 1rem 1.4rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700;">Account Balance</div>
+          <div style="font-family: var(--font-mono); font-size: 1.6rem; font-weight: 800; color: #34d399;">
+            ₹<span id="acc-balance-text">0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Profile Picture (DP) Section -->
+      <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem;">🖼️ Change Your Avatar (DP)</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Select one of our stylish avatars or provide a custom image URL:
+        </p>
+
+        <!-- Avatar Presets -->
+        <div class="avatar-grid" id="avatar-presets-grid">
+          <!-- Populated by script with cool presets -->
+        </div>
+
+        <div class="form-group" style="margin-top: 1.2rem;">
+          <label class="form-label">Or Custom Image URL:</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="url" id="custom-dp-url" class="form-input" style="flex: 1;" placeholder="https://example.com/my-photo.jpg">
+            <button id="apply-custom-dp-btn" class="btn btn-primary" style="white-space: nowrap;">Save Custom DP</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone: Delete Account -->
+      <div class="glass-card" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(30, 10, 10, 0.4);">
+        <h3 style="font-size: 1.2rem; font-weight: 700; color: #f87171; margin-bottom: 0.4rem;">⚠️ Danger Zone</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.2rem; line-height: 1.5;">
+          Deleting your account permanently removes your game profile, your Game UID, all transaction history, and remaining balance. This action cannot be undone.
+        </p>
+
+        <button id="delete-account-btn" class="btn btn-danger">
+          🗑️ Delete My Account Permanently
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal-box" style="text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚠️</div>
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.6rem; color: #f87171;">Confirm Account Deletion</h2>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+        Are you absolutely sure you want to delete your Wingo 11 account? All progress and funds will be permanently lost.
+      </p>
+
+      <div style="display: flex; gap: 10px;">
+        <button id="cancel-delete-btn" class="btn btn-outline" style="flex: 1;">Cancel</button>
+        <button id="confirm-delete-btn" class="btn btn-danger" style="flex: 1;">Yes, Delete Account</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { setupNavbar, startAuthWatcher, showToast, currentUser, currentAuthUser } from "./shared.js";
+    import { deleteUserAccount, db } from "./firebase-config.js";
+    import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { sound } from "./audio.js";
+
+    setupNavbar("account");
+
+    const pfpImg = document.getElementById("acc-pfp-img");
+    const nameText = document.getElementById("acc-name-text");
+    const emailText = document.getElementById("acc-email-text");
+    const uidText = document.getElementById("acc-game-uid");
+    const balText = document.getElementById("acc-balance-text");
+    const copyUidBtn = document.getElementById("copy-uid-btn");
+    const presetsGrid = document.getElementById("avatar-presets-grid");
+    const customDpInput = document.getElementById("custom-dp-url");
+    const applyCustomDpBtn = document.getElementById("apply-custom-dp-btn");
+    const deleteBtn = document.getElementById("delete-account-btn");
+    const deleteModal = document.getElementById("delete-modal");
+    const cancelDeleteBtn = document.getElementById("cancel-delete-btn");
+    const confirmDeleteBtn = document.getElementById("confirm-delete-btn");
+
+    // Curated high-res avatar seeds
+    const avatarSeeds = [
+      "casino-king", "lucky-tiger", "cyber-ninja", "crypto-bull", 
+      "neon-phoenix", "gold-dragon", "shadow-phantom", "queen-spades"
+    ];
+
+    avatarSeeds.forEach(seed => {
+      const url = `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
+      const img = document.createElement("img");
+      img.src = url;
+      img.className = "avatar-choice";
+      img.title = `Avatar: ${seed}`;
+      img.onclick = () => selectAndSaveAvatar(url);
+      presetsGrid.appendChild(img);
+    });
+
+    startAuthWatcher((userProfile) => {
+      if (userProfile) {
+        pfpImg.src = userProfile.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${userProfile.uid}`;
+        nameText.textContent = userProfile.displayName || "Player";
+        emailText.textContent = userProfile.email || "Google Account";
+        uidText.textContent = userProfile.gameUid || "W11-USER";
+        balText.textContent = parseFloat(userProfile.balance || 0).toFixed(2);
+      } else {
+        nameText.textContent = "Guest Player";
+        emailText.textContent = "Please sign in to access settings";
+      }
+    });
+
+    copyUidBtn.onclick = () => {
+      sound.playClick();
+      if (!currentUser) return;
+      navigator.clipboard.writeText(currentUser.gameUid).then(() => {
+        showToast(`Game UID ${currentUser.gameUid} copied!`, "success");
+      });
+    };
+
+    async function selectAndSaveAvatar(photoURL) {
+      if (!currentUser) {
+        showToast("Please sign in first!", "error");
+        return;
+      }
+      sound.playClick();
+      try {
+        await updateDoc(doc(db, "users", currentUser.uid), { photoURL });
+        pfpImg.src = photoURL;
+        showToast("Profile avatar updated successfully!", "success");
+      } catch (err) {
+        showToast("Failed to update avatar: " + err.message, "error");
+      }
+    }
+
+    applyCustomDpBtn.onclick = async () => {
+      const url = customDpInput.value.trim();
+      if (!url.startsWith("http")) {
+        showToast("Please enter a valid image URL starting with http/https", "error");
+        return;
+      }
+      await selectAndSaveAvatar(url);
+      customDpInput.value = "";
+    };
+
+    deleteBtn.onclick = () => {
+      sound.playExplosion();
+      deleteModal.classList.add("show");
+    };
+
+    cancelDeleteBtn.onclick = () => {
+      deleteModal.classList.remove("show");
+    };
+
+    confirmDeleteBtn.onclick = async () => {
+      confirmDeleteBtn.disabled = true;
+      confirmDeleteBtn.textContent = "Deleting...";
+
+      try {
+        await deleteUserAccount(currentAuthUser);
+        showToast("Your account has been deleted.", "info");
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 1500);
+      } catch (err) {
+        showToast("Deletion failed: " + err.message, "error");
+        confirmDeleteBtn.disabled = false;
+        confirmDeleteBtn.textContent = "Yes, Delete Account";
+      }
+    };
+  </script>
+</body>
+</html>
